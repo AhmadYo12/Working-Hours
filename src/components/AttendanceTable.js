@@ -75,7 +75,6 @@ function AttendanceTable() {
     } else if (daySchedule) {
       const [sh, sm] = daySchedule.startTime.split(':').map(Number);
       const [eh, em] = daySchedule.endTime.split(':').map(Number);
-      const scheduledWorkMinutes = (eh * 60 + em) - (sh * 60 + sm);
 
       lateArrival = Math.max(0, (ah * 60 + am) - (sh * 60 + sm));
       earlyDeparture = Math.max(0, (eh * 60 + em) - (aeh * 60 + aem));
