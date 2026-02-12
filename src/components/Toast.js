@@ -26,5 +26,4 @@ function Toast({ message, type = "error", onClose }) {
     </div>
   );
 }
-
 export default Toast;

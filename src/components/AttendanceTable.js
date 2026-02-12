@@ -12,7 +12,7 @@ function AttendanceTable() {
   const [schedule, setSchedule] = useState({});
   const [userName, setUserName] = useState('');
   const [filterType, setFilterType] = useState('month');
-  const [currentPeriod, setCurrentPeriod] = useState(new Date());
+  const [currentPeriod] = useState(new Date());
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
@@ -140,10 +140,12 @@ function AttendanceTable() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     applyFilter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attendance, filterType, currentPeriod, selectedMonth]);
 
   const getWorkingPeriod = () => {

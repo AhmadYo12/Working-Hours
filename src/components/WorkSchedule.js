@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '../firebase';
+import { db } from '../firebase';
 import './WorkSchedule.css';
 
 function WorkSchedule({ onComplete }) {
