@@ -1,0 +1,128 @@
+.phone-login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.login-card {
+  max-width: 450px;
+  width: 100%;
+  padding: 50px 40px;
+  background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+  border-radius: 25px;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.login-card h2 {
+  margin-bottom: 40px;
+  color: #fff;
+  text-align: center;
+  font-size: 36px;
+  font-weight: 800;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.login-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  right: 20px;
+  font-size: 22px;
+  color: rgba(255,255,255,0.4);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 18px 55px 18px 20px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 15px;
+  font-size: 17px;
+  text-align: right;
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: rgba(255,255,255,0.1);
+  box-shadow: 0 0 25px rgba(102,126,234,0.4);
+}
+
+.input-group input:focus + .input-icon {
+  color: #667eea;
+}
+
+.input-group input::placeholder {
+  color: rgba(255,255,255,0.4);
+}
+
+.login-card button {
+  padding: 18px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(102,126,234,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.login-card button svg {
+  font-size: 24px;
+}
+
+.login-card button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(102,126,234,0.7);
+}
+
+.gun {
+  position: fixed;
+  z-index: 9999;
+  transition: none;
+  user-select: none;
+  filter: drop-shadow(0 0 15px rgba(102,126,234,0.9));
+  animation: gunGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes gunGlow {
+  0%, 100% { 
+    filter: drop-shadow(0 0 15px rgba(102,126,234,0.9)) drop-shadow(0 0 25px rgba(118,75,162,0.6)); 
+  }
+  50% { 
+    filter: drop-shadow(0 0 25px rgba(118,75,162,1)) drop-shadow(0 0 35px rgba(102,126,234,0.8)); 
+  }
+}
+
+.bullet {
+  position: fixed;
+  font-size: 30px;
+  color: #FFD700;
+  z-index: 9998;
+  pointer-events: none;
+  text-shadow: 0 0 10px #FFD700;
+}

@@ -1,0 +1,66 @@
+.profile-setup {
+  max-width: 450px;
+  margin: 50px auto;
+  padding: 40px;
+  background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.profile-setup h2 {
+  margin-bottom: 30px;
+  color: #fff;
+  font-size: 32px;
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.profile-setup form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-setup input {
+  padding: 16px 20px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  font-size: 17px;
+  text-align: center;
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.profile-setup input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: rgba(255,255,255,0.1);
+  box-shadow: 0 0 20px rgba(102,126,234,0.3);
+}
+
+.profile-setup input::placeholder {
+  color: rgba(255,255,255,0.4);
+}
+
+.profile-setup button {
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.profile-setup button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(102,126,234,0.6);
+}
