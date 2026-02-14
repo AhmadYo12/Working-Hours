@@ -13,6 +13,8 @@ function PhoneLogin({ onLoginSuccess, onAdminLogin }) {
   const [gun, setGun] = useState({ x: 100, y: -100, grabbed: false });
   const [bullets, setBullets] = useState([]);
   const [buttonHealth, setButtonHealth] = useState(20);
+  const [buttonDodgePosition, setButtonDodgePosition] = useState({ x: 0, y: 0 });
+  const [buttonPermanentPosition, setButtonPermanentPosition] = useState({ x: 0, y: 0 });
 
   const isFormValid = () => {
     return phoneNumber.length === 10 && password.length >= 8;
@@ -52,7 +54,7 @@ function PhoneLogin({ onLoginSuccess, onAdminLogin }) {
       
       setTimeout(() => {
         setBullets(prev => prev.filter(b => b.id !== newBullet.id));
-      }, 1000);
+      }, 3000);
     }
     if (e.button === 2) {
       setGun({ ...gun, grabbed: false });
@@ -69,14 +71,42 @@ function PhoneLogin({ onLoginSuccess, onAdminLogin }) {
   useEffect(() => {
     bullets.forEach(bullet => {
       const buttonEl = document.querySelector('.login-card button[type="submit"]');
-      if (buttonEl) {
+      if (buttonEl && buttonHealth > 0) {
         const rect = buttonEl.getBoundingClientRect();
         if (bullet.x > rect.left && bullet.x < rect.right && bullet.y > rect.top && bullet.y < rect.bottom) {
-          setButtonHealth(prev => Math.max(0, prev - 1));
+          const hitChance = Math.random();
+          if (hitChance < 0.5) {
+            setButtonHealth(prev => {
+              const newHealth = Math.max(0, prev - 1);
+              if (newHealth === 0) {
+                setTimeout(() => {
+                  setButtonPermanentPosition({ x: 0, y: 0 });
+                  setButtonDodgePosition({ x: 0, y: 0 });
+                  setButtonPosition({ top: 0, left: 0 });
+                }, 100);
+              }
+              return newHealth;
+            });
+            setBullets(prev => prev.filter(b => b.id !== bullet.id));
+          } else if (hitChance < 0.75) {
+            const dodgeX = (Math.random() - 0.5) * 200;
+            const dodgeY = Math.random() * -100 - 50;
+            setButtonDodgePosition({ x: dodgeX, y: dodgeY });
+            setTimeout(() => setButtonDodgePosition({ x: 0, y: 0 }), 150);
+            setBullets(prev => prev.filter(b => b.id !== bullet.id));
+          } else {
+            const loginCard = document.querySelector('.login-card');
+            const cardRect = loginCard.getBoundingClientRect();
+            const maxX = (cardRect.width - rect.width) / 2;
+            const newX = (Math.random() - 0.5) * maxX * 2;
+            const newY = Math.random() * -150 - 50;
+            setButtonPermanentPosition({ x: newX, y: newY });
+            setBullets(prev => prev.filter(b => b.id !== bullet.id));
+          }
         }
       }
     });
-  }, [bullets]);
+  }, [bullets, buttonHealth]);
 
   const handleButtonHover = (e) => {
     if (!isFormValid() && buttonHealth > 0) {
@@ -187,14 +217,14 @@ function PhoneLogin({ onLoginSuccess, onAdminLogin }) {
             onMouseMove={handleButtonHover}
             style={{
               ...(!isFormValid() && buttonHealth > 0 ? {
-                transform: `translate(${buttonPosition.left}px, ${buttonPosition.top}px)`,
-                transition: "transform 0.1s ease",
+                transform: `translate(${buttonPosition.left + buttonDodgePosition.x + buttonPermanentPosition.x}px, ${buttonPosition.top + buttonDodgePosition.y + buttonPermanentPosition.y}px)`,
+                transition: "transform 0.05s ease",
               } : {
-                transform: 'translate(0, 0)',
-                transition: "transform 0.3s ease"
+                transform: `translate(${buttonDodgePosition.x + buttonPermanentPosition.x}px, ${buttonDodgePosition.y + buttonPermanentPosition.y}px)`,
+                transition: "transform 0.1s ease"
               }),
               background: `linear-gradient(90deg, #1a1a2e 0%, #1a1a2e ${(1 - buttonHealth / 20) * 100}%, #667eea ${(1 - buttonHealth / 20) * 100}%, #764ba2 100%)`,
-              transition: 'background 0.3s ease, transform 0.3s ease'
+              transition: 'background 0.3s ease, transform 0.1s ease'
             }}
           >
             {buttonHealth === 0 && <span style={{ marginLeft: '8px' }}>☠️</span>}

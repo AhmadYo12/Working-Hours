@@ -7,6 +7,7 @@ import ProfileSetup from './components/ProfileSetup';
 import WorkSchedule from './components/WorkSchedule';
 import AttendanceTable from './components/AttendanceTable';
 import AdminPanel from './components/AdminPanel';
+import Toast from './components/Toast';
 import './App.css';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
   const [hasProfile, setHasProfile] = useState(null);
   const [hasSchedule, setHasSchedule] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -56,9 +58,11 @@ function App() {
         const data = profileDoc.data();
         console.log('Profile data:', data);
         if (data.isActive === false) {
-          alert('تم إيقاف حسابك!');
-          localStorage.clear();
-          window.location.reload();
+          setToast({ message: 'تم إيقاف حسابك!', type: 'error' });
+          setTimeout(() => {
+            localStorage.clear();
+            window.location.reload();
+          }, 2000);
           return;
         }
         setHasProfile(true);
@@ -94,7 +98,18 @@ function App() {
   if (!hasProfile) return <ProfileSetup onComplete={() => setHasProfile(true)} />;
   if (!hasSchedule) return <WorkSchedule onComplete={() => setHasSchedule(true)} />;
   
-  return <AttendanceTable />;
+  return (
+    <>
+      <AttendanceTable />
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
+    </>
+  );
 }
 
 export default App;

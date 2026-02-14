@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { db, auth } from '../firebase';
+import Toast from './Toast';
 import './AdminPanel.css';
 
 function AdminPanel() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     loadUsers();
@@ -57,22 +59,24 @@ function AdminPanel() {
   };
 
   const deleteUser = async (phoneNumber) => {
-    if (!window.confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
-    
-    await deleteDoc(doc(db, 'usersList', phoneNumber));
-    await deleteDoc(doc(db, 'users', phoneNumber, 'profile', 'info'));
-    
-    const scheduleDoc = await getDocs(collection(db, 'users', phoneNumber, 'workSchedule'));
-    scheduleDoc.forEach(async (d) => {
-      await deleteDoc(doc(db, 'users', phoneNumber, 'workSchedule', d.id));
-    });
-    
-    const attendanceDoc = await getDocs(collection(db, 'users', phoneNumber, 'attendance'));
-    attendanceDoc.forEach(async (d) => {
-      await deleteDoc(doc(db, 'users', phoneNumber, 'attendance', d.id));
-    });
-    
-    loadUsers();
+    setToast({ message: 'هل أنت متأكد من حذف هذا المستخدم؟', type: 'warning' });
+    setTimeout(async () => {
+      await deleteDoc(doc(db, 'usersList', phoneNumber));
+      await deleteDoc(doc(db, 'users', phoneNumber, 'profile', 'info'));
+      
+      const scheduleDoc = await getDocs(collection(db, 'users', phoneNumber, 'workSchedule'));
+      scheduleDoc.forEach(async (d) => {
+        await deleteDoc(doc(db, 'users', phoneNumber, 'workSchedule', d.id));
+      });
+      
+      const attendanceDoc = await getDocs(collection(db, 'users', phoneNumber, 'attendance'));
+      attendanceDoc.forEach(async (d) => {
+        await deleteDoc(doc(db, 'users', phoneNumber, 'attendance', d.id));
+      });
+      
+      loadUsers();
+      setToast({ message: 'تم الحذف بنجاح', type: 'success' });
+    }, 2000);
   };
 
   if (loading) return <div className="loading">جاري التحميل...</div>;
@@ -125,6 +129,13 @@ function AdminPanel() {
         </table>
         {users.length === 0 && <p className="no-users">لا يوجد مستخدمين</p>}
       </div>
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
     </div>
   );
 }

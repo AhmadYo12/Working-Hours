@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import Toast from './Toast';
 import './ProfileSetup.css';
 
 function ProfileSetup({ onComplete }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [toast, setToast] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,7 +34,7 @@ function ProfileSetup({ onComplete }) {
       onComplete();
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('خطأ في حفظ البيانات: ' + error.message);
+      setToast({ message: 'خطأ في حفظ البيانات: ' + error.message, type: 'error' });
     }
   };
 
@@ -56,6 +58,13 @@ function ProfileSetup({ onComplete }) {
         />
         <button type="submit">التالي</button>
       </form>
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
     </div>
   );
 }

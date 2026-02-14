@@ -4,6 +4,7 @@ import { signOut } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import * as XLSX from 'xlsx';
 import { IoDownload, IoLogOut, IoAddCircle, IoTrash, IoChevronBack, IoChevronForward, IoCalendar } from 'react-icons/io5';
+import Toast from './Toast';
 import './AttendanceTable.css';
 
 function AttendanceTable() {
@@ -17,6 +18,7 @@ function AttendanceTable() {
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const [timeEntry, setTimeEntry] = useState({ start: '', end: '', notes: '' });
+  const [toast, setToast] = useState(null);
 
   const openQuickEntry = (date) => {
     setSelectedDate(date);
@@ -33,7 +35,7 @@ function AttendanceTable() {
       saveInlineEntry(selectedDate, timeEntry.start, timeEntry.end);
       setShowModal(false);
     } else {
-      alert('يرجى إدخال وقت الدخول والخروج');
+      setToast({ message: 'يرجى إدخال وقت الدخول والخروج', type: 'warning' });
     }
   };
 
@@ -308,10 +310,13 @@ function AttendanceTable() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('هل تريد حذف هذا السجل؟')) return;
-    const userPhone = localStorage.getItem('userPhone');
-    await deleteDoc(doc(db, 'users', userPhone, 'attendance', id));
-    loadData();
+    setToast({ message: 'هل تريد حذف هذا السجل؟', type: 'warning' });
+    setTimeout(async () => {
+      const userPhone = localStorage.getItem('userPhone');
+      await deleteDoc(doc(db, 'users', userPhone, 'attendance', id));
+      loadData();
+      setToast({ message: 'تم الحذف بنجاح', type: 'success' });
+    }, 2000);
   };
 
   const handleLogout = async () => {
@@ -632,10 +637,12 @@ function AttendanceTable() {
                   onChange={(e) => setTimeEntry({ ...timeEntry, start: e.target.value })}
                 />
                 <div className="quick-time-buttons">
-                  <button className="quick-time-btn" onClick={() => setQuickTime('start', '07:00')}>7:00</button>
                   <button className="quick-time-btn" onClick={() => setQuickTime('start', '08:00')}>8:00</button>
                   <button className="quick-time-btn" onClick={() => setQuickTime('start', '09:00')}>9:00</button>
-                  <button className="quick-time-btn" onClick={() => setQuickTime('start', '13:00')}>1:00 PM</button>
+                  <button className="quick-time-btn" onClick={() => setQuickTime('start', '10:00')}>10:00</button>
+                  <button className="quick-time-btn" onClick={() => setQuickTime('start', '11:00')}>11:00</button>
+                  <button className="quick-time-btn" onClick={() => setQuickTime('start', '12:00')}>12:00</button>
+                  <button className="quick-time-btn" onClick={() => setQuickTime('start', '14:00')}>2:00 PM</button>
                 </div>
               </div>
               
@@ -667,6 +674,13 @@ function AttendanceTable() {
             </div>
           </div>
         </div>
+      )}
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
       )}
     </div>
   );

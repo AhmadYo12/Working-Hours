@@ -73,6 +73,16 @@
   color: rgba(255,255,255,0.4);
 }
 
+.input-group input:-webkit-autofill,
+.input-group input:-webkit-autofill:hover,
+.input-group input:-webkit-autofill:focus,
+.input-group input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #2d2d44 inset !important;
+  -webkit-text-fill-color: #fff !important;
+  border: 2px solid rgba(255,255,255,0.1) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .login-card button {
   padding: 18px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
