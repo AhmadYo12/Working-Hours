@@ -482,3 +482,14 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(245,87,108,0.6);
 }
+
+.note-absent {
+  color: #ff1744;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 10px;
+  background: rgba(255,23,68,0.15);
+  border-radius: 8px;
+  border-left: 3px solid #ff1744;
+  text-align: center;
+}

@@ -5,6 +5,7 @@ import { db, auth } from '../firebase';
 import * as XLSX from 'xlsx';
 import { IoDownload, IoLogOut, IoAddCircle, IoTrash, IoChevronBack, IoChevronForward, IoCalendar } from 'react-icons/io5';
 import Toast from './Toast';
+import ConfirmDialog from './ConfirmDialog';
 import './AttendanceTable.css';
 
 function AttendanceTable() {
@@ -19,6 +20,7 @@ function AttendanceTable() {
   const [selectedDate, setSelectedDate] = useState('');
   const [timeEntry, setTimeEntry] = useState({ start: '', end: '', notes: '' });
   const [toast, setToast] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState(null);
 
   const openQuickEntry = (date) => {
     setSelectedDate(date);
@@ -191,6 +193,8 @@ function AttendanceTable() {
     
     const allDays = [];
     const currentDate = new Date(startDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     currentDate.setHours(0, 0, 0, 0);
     
     while (currentDate <= endDate) {
@@ -201,6 +205,8 @@ function AttendanceTable() {
       const dayKey = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][currentDate.getDay()];
       
       const existingRecord = attendance.find(a => a.date === dateStr);
+      const daySchedule = schedule[dayKey];
+      const isPast = currentDate < today;
       
       if (existingRecord) {
         allDays.push(existingRecord);
@@ -209,7 +215,8 @@ function AttendanceTable() {
           id: dateStr,
           date: dateStr,
           day: dayKey,
-          isEmpty: true
+          isEmpty: true,
+          isAbsent: isPast && daySchedule
         });
       }
       
@@ -309,14 +316,18 @@ function AttendanceTable() {
     loadData();
   };
 
-  const handleDelete = async (id) => {
-    setToast({ message: 'هل تريد حذف هذا السجل؟', type: 'warning' });
-    setTimeout(async () => {
-      const userPhone = localStorage.getItem('userPhone');
-      await deleteDoc(doc(db, 'users', userPhone, 'attendance', id));
-      loadData();
-      setToast({ message: 'تم الحذف بنجاح', type: 'success' });
-    }, 2000);
+  const handleDelete = (id) => {
+    setConfirmDialog({
+      message: 'هل تريد حذف هذا السجل؟',
+      onConfirm: async () => {
+        const userPhone = localStorage.getItem('userPhone');
+        await deleteDoc(doc(db, 'users', userPhone, 'attendance', id));
+        loadData();
+        setToast({ message: 'تم الحذف بنجاح', type: 'success' });
+        setConfirmDialog(null);
+      },
+      onCancel: () => setConfirmDialog(null)
+    });
   };
 
   const handleLogout = async () => {
@@ -390,9 +401,18 @@ function AttendanceTable() {
     let totalOvertime = 0;
     let totalCorrectWork = 0;
     let totalActualWork = 0;
+    let totalAbsent = 0;
     
     filteredAttendance.forEach(a => {
-      if (!a.isEmpty) {
+      if (a.isAbsent) {
+        const daySchedule = schedule[a.day];
+        if (daySchedule) {
+          const [sh, sm] = daySchedule.startTime.split(':').map(Number);
+          const [eh, em] = daySchedule.endTime.split(':').map(Number);
+          const scheduledMinutes = (eh * 60 + em) - (sh * 60 + sm);
+          totalAbsent += scheduledMinutes;
+        }
+      } else if (!a.isEmpty) {
         totalLate += (a.lateMinutes || 0) + (a.earlyMinutes || 0);
         totalOvertime += a.overtimeMinutes || 0;
         
@@ -415,7 +435,8 @@ function AttendanceTable() {
       totalOvertime, 
       totalCorrectWork,
       totalWorkMinutes,
-      totalActualWork
+      totalActualWork,
+      totalAbsent
     };
   };
 
@@ -583,6 +604,11 @@ function AttendanceTable() {
                     {record.notes && <div className="note-custom">{record.notes}</div>}
                   </>
                 )}
+                {record.isAbsent && (
+                  <div className="note-absent">
+                    غياب
+                  </div>
+                )}
               </td>
               <td>
                 {record.isEmpty ? (
@@ -604,19 +630,26 @@ function AttendanceTable() {
         </tbody>
         <tfoot>
           <tr>
-            <td colSpan="5"><strong>المجموع الكلي</strong></td>
-            <td colSpan="2">
-              <div style={{marginBottom: '8px'}}>
+            <td colSpan="7">
+              <div style={{textAlign: 'center', marginBottom: '15px'}}>
+                <strong style={{fontSize: '1.2em'}}>المجموع الكلي</strong>
+              </div>
+              <div style={{textAlign: 'center', marginBottom: '15px', fontSize: '1.1em'}}>
                 <strong>مجموع ساعات الدوام:</strong> {Math.floor(totals.totalWorkMinutes / 60)}:{String(totals.totalWorkMinutes % 60).padStart(2, '0')} ساعة
               </div>
-              <div style={{marginBottom: '8px', color: '#4CAF50'}}>
-                دوام صحيح: {Math.floor(totals.totalCorrectWork / 60)}:{String(totals.totalCorrectWork % 60).padStart(2, '0')} ساعة
-              </div>
-              <div style={{marginBottom: '8px', color: '#FF9800'}}>
-                إضافي: {Math.floor(totals.totalOvertime / 60)}:{String(totals.totalOvertime % 60).padStart(2, '0')} ساعة
-              </div>
-              <div style={{color: '#f44336'}}>
-                تأخير: {Math.floor(totals.totalLate / 60)}:{String(totals.totalLate % 60).padStart(2, '0')} ساعة
+              <div style={{display: 'flex', gap: '50px', flexWrap: 'wrap', justifyContent: 'center'}}>
+                <div style={{color: '#4CAF50'}}>
+                  دوام صحيح: {Math.floor(totals.totalCorrectWork / 60)}:{String(totals.totalCorrectWork % 60).padStart(2, '0')} ساعة
+                </div>
+                <div style={{color: '#FF9800'}}>
+                  إضافي: {Math.floor(totals.totalOvertime / 60)}:{String(totals.totalOvertime % 60).padStart(2, '0')} ساعة
+                </div>
+                <div style={{color: '#f44336'}}>
+                  تأخير: {Math.floor(totals.totalLate / 60)}:{String(totals.totalLate % 60).padStart(2, '0')} ساعة
+                </div>
+                <div style={{color: '#ff1744'}}>
+                  غياب: {Math.floor(totals.totalAbsent / 60)}:{String(totals.totalAbsent % 60).padStart(2, '0')} ساعة
+                </div>
               </div>
             </td>
           </tr>
@@ -642,6 +675,7 @@ function AttendanceTable() {
                   <button className="quick-time-btn" onClick={() => setQuickTime('start', '10:00')}>10:00</button>
                   <button className="quick-time-btn" onClick={() => setQuickTime('start', '11:00')}>11:00</button>
                   <button className="quick-time-btn" onClick={() => setQuickTime('start', '12:00')}>12:00</button>
+                  <button className="quick-time-btn" onClick={() => setQuickTime('start', '13:00')}>1:00 PM</button>
                   <button className="quick-time-btn" onClick={() => setQuickTime('start', '14:00')}>2:00 PM</button>
                 </div>
               </div>
@@ -658,6 +692,7 @@ function AttendanceTable() {
                   <button className="quick-time-btn" onClick={() => setQuickTime('end', '18:00')}>6:00 PM</button>
                   <button className="quick-time-btn" onClick={() => setQuickTime('end', '19:00')}>7:00 PM</button>
                   <button className="quick-time-btn" onClick={() => setQuickTime('end', '20:00')}>8:00 PM</button>
+                  <button className="quick-time-btn" onClick={() => setQuickTime('end', '21:00')}>9:00 PM</button>
                 </div>
               </div>
             </div>
@@ -674,6 +709,13 @@ function AttendanceTable() {
             </div>
           </div>
         </div>
+      )}
+      {confirmDialog && (
+        <ConfirmDialog 
+          message={confirmDialog.message}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={confirmDialog.onCancel}
+        />
       )}
       {toast && (
         <Toast 
